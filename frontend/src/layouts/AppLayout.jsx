@@ -42,7 +42,10 @@ const AppLayout = () => {
           </Link>
           <nav className="flex items-center gap-2">
             <NavLink to="/" className={navLinkClass}>
-              Analyze
+              Analyze Document
+            </NavLink>
+            <NavLink to="/contact" className={navLinkClass}>
+              Contact Us
             </NavLink>
             {user && (
               <NavLink to="/history" className={navLinkClass}>

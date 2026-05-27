@@ -7,9 +7,9 @@ import LoadingButton from '../components/LoadingButton.jsx';
 import { analyzeText, uploadDocument } from '../services/api.js';
 
 const sampleRisks = [
-  { label: 'Cookies + ads', tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100' },
-  { label: 'Third-party sharing', tone: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-100' },
-  { label: 'Location signals', tone: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100' }
+  { label: 'Ad tracking', tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100' },
+  { label: 'Partner data sharing', tone: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-100' },
+  { label: 'Location use', tone: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100' }
 ];
 
 const pipelineLabels = [
@@ -95,7 +95,7 @@ const HomePage = () => {
               Understand privacy policies before accepting them.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 md:text-base dark:text-slate-300">
-              TermsWise turns dense policies into a clean risk report with tracking, cookies, data selling, retention, and third-party sharing insights.
+              See what a policy allows, what it asks of you, and which terms deserve attention before you accept.
             </p>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -125,10 +125,10 @@ const HomePage = () => {
             <div className="rounded-2xl border border-slate-200/80 bg-slate-950 p-3 text-white shadow-xl dark:border-slate-800">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm text-slate-400">Sample privacy report</p>
-                  <h2 className="mt-0.5 text-lg font-bold">Policy risk overview</h2>
+                  <p className="text-sm text-slate-400">Privacy brief preview</p>
+                  <h2 className="mt-0.5 text-lg font-bold">What deserves attention</h2>
                 </div>
-                <span className="rounded-xl bg-amber-300 px-3 py-1.5 text-sm font-black text-amber-950">Grade C</span>
+                <span className="rounded-xl bg-amber-300 px-3 py-1.5 text-sm font-black text-amber-950">Review C</span>
               </div>
 
               <div className="mt-3 grid gap-3 sm:grid-cols-[0.72fr_1fr]">
@@ -137,7 +137,7 @@ const HomePage = () => {
                     <div className="grid h-[72px] w-[72px] place-items-center rounded-full bg-slate-950">
                       <div className="text-center">
                         <p className="text-2xl font-black">58</p>
-                        <p className="text-xs text-slate-400">risk score</p>
+                        <p className="text-xs text-slate-400">exposure level</p>
                       </div>
                     </div>
                   </div>
@@ -146,8 +146,8 @@ const HomePage = () => {
                 <div className="space-y-2.5">
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-2 text-sm font-semibold"><ShieldAlert size={16} className="text-amber-300" /> Detected clauses</span>
-                      <span className="text-xs text-slate-400">3 categories</span>
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold"><ShieldAlert size={16} className="text-amber-300" /> Key privacy concerns</span>
+                      <span className="text-xs text-slate-400">Review first</span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {sampleRisks.map((risk) => (
@@ -157,7 +157,7 @@ const HomePage = () => {
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">Highlighted evidence</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Why it matters</p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">"We may share device identifiers with advertising partners."</p>
                   </div>
                 </div>
@@ -166,9 +166,9 @@ const HomePage = () => {
 
             <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
               {[
-                [LockKeyhole, 'Encrypted mention', 'positive'],
-                [ShieldCheck, 'Deletion rights', 'found'],
-                [FileText, 'Plain summary', 'ready']
+                [LockKeyhole, 'Security language', 'noted'],
+                [ShieldCheck, 'Deletion rights', 'available'],
+                [FileText, 'Plain-English brief', 'ready']
               ].map(([Icon, label, value]) => (
                 <div key={label} className="rounded-2xl border border-slate-200/80 bg-white/75 p-2.5 shadow-sm dark:border-white/10 dark:bg-white/5">
                   <Icon size={17} className="text-emerald-600 dark:text-emerald-300" />

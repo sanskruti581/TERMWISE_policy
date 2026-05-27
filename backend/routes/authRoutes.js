@@ -7,6 +7,8 @@ import asyncHandler from '../utils/asyncHandler.js';
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const PASSWORD_HELP = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
 
 // Sign Up
 router.post('/signup', asyncHandler(async (req, res) => {
@@ -14,6 +16,10 @@ router.post('/signup', asyncHandler(async (req, res) => {
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  if (!PASSWORD_RULE.test(password)) {
+    return res.status(400).json({ message: PASSWORD_HELP });
   }
 
   const userExists = await User.findOne({ email });

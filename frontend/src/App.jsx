@@ -5,6 +5,7 @@ import ResultsPage from './pages/ResultsPage.jsx';
 import HistoryPage from './pages/HistoryPage.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
+import ContactPage from './pages/ContactPage.jsx';
 
 const App = () => (
   <BrowserRouter>
@@ -13,6 +14,7 @@ const App = () => (
       <Route path="/signup" element={<SignUpPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/results/:id" element={<ResultsPage />} />
         <Route path="/history" element={<HistoryPage />} />
       </Route>
