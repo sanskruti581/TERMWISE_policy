@@ -63,9 +63,13 @@ const normalizeHighlight = (highlight) => {
     sensitivity: cleanText(highlight.sensitivity),
     explanation: cleanText(highlight.explanation),
     badges: Array.isArray(highlight.badges) ? highlight.badges.map(cleanText).filter(Boolean) : [],
-    dimensions: highlight.dimensions || null
+    dimensions: highlight.dimensions || null,
+    evidence: Array.isArray(highlight.evidence) ? highlight.evidence : []
   };
 };
+
+
+
 
 export const presentAnalysis = (analysis) => {
   const item = toPlain(analysis);
@@ -73,8 +77,10 @@ export const presentAnalysis = (analysis) => {
     category: risk.category,
     severity: risk.severity,
     points: risk.points,
-    matches: [...new Set(risk.matches || [])]
+    matches: [...new Set(risk.matches || [])],
+    evidence: Array.isArray(risk.evidence) ? risk.evidence : []
   }));
+
 
   const highlights = uniqueBy(
     (item.highlightedClauses || []).map(normalizeHighlight).filter(Boolean),

@@ -47,6 +47,22 @@ const classifyDomain = (classification, themeSummary) => {
   }
 };
 
+const procurementHint = (text) => {
+  return /procurement|supplier|vendor|purchase order|goods and services|purchase contract/i.test(text);
+};
+
+const employmentHint = (text) => {
+  return /employee|employment agreement|compensation|benefits|non[-\s]?competition|termination benefits|at will employment/i.test(text);
+};
+
+const operationalIntentHint = (text) => {
+  return /service provider|vendor|supplier|procurement|operations?|maintenance|support|maintenance obligations?|hygiene|sanitation|compliance|standards?/i.test(text);
+};
+
+const hasContractComplianceSignals = (text) => {
+  return /compliance|standards?|hygiene|sanitation|health and safety|penal(?:ty| charges?)|fines|termination|breach/i.test(text);
+};
+
 export const classifyLegalSubtype = (classification, themeSummary, text) => {
   const normalized = normalizeText(text);
   const commercialShare = getThemeShare(themeSummary.themeDominance, 'commercial');
@@ -55,7 +71,7 @@ export const classifyLegalSubtype = (classification, themeSummary, text) => {
   const exportShare = getThemeShare(themeSummary.themeDominance, 'export');
   const liabilityShare = getThemeShare(themeSummary.themeDominance, 'liability');
   const operationalShare = getThemeShare(themeSummary.themeDominance, 'operational');
-  const deliveryShare = getThemeShare(themeSummary.themeDominance, 'delivery');
+  const _deliveryShare = getThemeShare(themeSummary.themeDominance, 'delivery');
 
   const patterns = {
     procurement: countMatchPatterns(normalized, subtypePatterns.procurement),
@@ -71,8 +87,28 @@ export const classifyLegalSubtype = (classification, themeSummary, text) => {
   let documentSubtype = 'Legal/contract document';
   let documentSubtypeConfidence = 50;
 
-  if (classification.documentType === 'Financial Document' || patterns.financialLoan >= 2 || patterns.mortgageLoan >= 1) {
-    if (patterns.mortgageLoan >= 1) {
+  const roleKeys = new Set(classification.actorRoles?.map((r) => r.key) || []);
+  const hasBorrowerContext = roleKeys.has('borrower') || roleKeys.has('lender');
+  const hasOperationalContext = roleKeys.has('contractor') || roleKeys.has('vendor') || roleKeys.has('university') || roleKeys.has('purchaser');
+
+  // Procurement / Operational contract domains (penalties can be enforcement/compliance, not lending).
+  if (hasOperationalContext && (patterns.procurement >= 1 || operationalIntentHint(normalized) || hasContractComplianceSignals(normalized))) {
+    if (patterns.employment >= 1) {
+      documentSubtype = 'Operational compliance / employment service contract';
+      documentSubtypeConfidence = 60;
+    } else if (patterns.procurement >= 1) {
+      documentSubtype = 'Procurement / contractor vendor agreement';
+      documentSubtypeConfidence = 66;
+    } else {
+      documentSubtype = 'Operational compliance agreement';
+      documentSubtypeConfidence = 58;
+    }
+  } else if (classification.documentType === 'Financial Document' || patterns.financialLoan >= 2 || patterns.mortgageLoan >= 1) {
+    // If borrower context is absent but financial vocabulary is present, demote to operational compliance.
+    if (!hasBorrowerContext && hasOperationalContext) {
+      documentSubtype = 'Service/Operational compliance agreement';
+      documentSubtypeConfidence = 58;
+    } else if (patterns.mortgageLoan >= 1) {
       documentSubtype = 'Mortgage/secured loan agreement';
       documentSubtypeConfidence = 70 + Math.round(Math.min(14, patterns.mortgageLoan * 4 + patterns.financialLoan * 2));
     } else {
@@ -139,10 +175,3 @@ export const classifyLegalSubtype = (classification, themeSummary, text) => {
   };
 };
 
-const procurementHint = (text) => {
-  return /procurement|supplier|vendor|purchase order|goods and services|purchase contract/i.test(text);
-};
-
-const employmentHint = (text) => {
-  return /employee|employment agreement|compensation|benefits|non[-\s]?competition|termination benefits|at will employment/i.test(text);
-};

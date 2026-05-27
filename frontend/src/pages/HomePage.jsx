@@ -66,10 +66,14 @@ const HomePage = () => {
 
       setStep('Running semantic balancing');
       const analysis = await analyzeText({ text: policyText, title, sourceType });
+      const analysisId = analysis.id || analysis._id;
+      if (!analysisId) {
+        throw new Error('Analysis completed, but no report id was returned.');
+      }
       toast.success('Analysis complete');
-      navigate(`/results/${analysis.id || analysis._id}`, { state: { analysis } });
+      navigate(`/results/${analysisId}`, { state: { analysis } });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Unable to analyze this document.');
+      toast.error(error.response?.data?.message || error.message || 'Unable to analyze this document.');
     } finally {
       setLoading(false);
       setStep('');
@@ -98,7 +102,7 @@ const HomePage = () => {
               <a href="#analyze" className="btn-primary h-11 rounded-xl px-5 shadow-xl shadow-emerald-600/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-emerald-600/25">
                 <UploadCloud size={18} /> Analyze Policy
               </a>
-              <a href="#sample-report" className="btn-secondary h-11 rounded-xl border-slate-200/80 bg-white/80 px-5 shadow-lg shadow-slate-900/5 backdrop-blur hover:-translate-y-0.5 dark:border-slate-700/80 dark:bg-slate-900/70">
+              <a href="#sample-report-detail" className="btn-secondary h-11 rounded-xl border-slate-200/80 bg-white/80 px-5 shadow-lg shadow-slate-900/5 backdrop-blur hover:-translate-y-0.5 dark:border-slate-700/80 dark:bg-slate-900/70">
                 <BarChart3 size={18} /> View Sample Report
               </a>
             </div>
@@ -117,7 +121,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div id="sample-report" className="rounded-3xl border border-white/80 bg-white/70 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/55 dark:shadow-black/30">
+          <div className="rounded-3xl border border-white/80 bg-white/70 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/55 dark:shadow-black/30">
             <div className="rounded-2xl border border-slate-200/80 bg-slate-950 p-3 text-white shadow-xl dark:border-slate-800">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -172,6 +176,56 @@ const HomePage = () => {
                   <p className="text-xs text-slate-500 dark:text-slate-400">{value}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sample-report-detail" className="scroll-mt-24 rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70">
+        <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Sample Report</p>
+            <h2 className="mt-0.5 text-2xl font-black text-slate-950 dark:text-white">What the result page looks like</h2>
+          </div>
+          <a href="#analyze" className="btn-primary h-10 rounded-xl px-4">
+            Analyze your document <ArrowRight size={17} />
+          </a>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Privacy Exposure Level</p>
+            <div className="mt-4 flex items-center gap-5">
+              <div className="grid h-24 w-24 place-items-center rounded-full bg-[conic-gradient(#f59e0b_0_58%,#e2e8f0_58%_100%)] dark:bg-[conic-gradient(#f59e0b_0_58%,#1e293b_58%_100%)]">
+                <div className="grid h-16 w-16 place-items-center rounded-full bg-white dark:bg-slate-950">
+                  <div className="text-center">
+                    <p className="text-xl font-black text-slate-950 dark:text-white">58</p>
+                    <p className="text-[10px] text-slate-500">/ 100</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-3xl font-black text-amber-700 dark:text-amber-300">C</p>
+                <p className="mt-1 font-semibold text-slate-950 dark:text-white">Moderate Data Handling Concern</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Some privacy-related provisions should be checked for user control and third-party access.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">What This Means</p>
+            <p className="mt-3 text-sm leading-7 text-emerald-950 dark:text-emerald-100">
+              This policy allows advertising partners to receive device identifiers and may use tracking technologies for personalization. Review third-party sharing, consent controls, and whether users can opt out.
+            </p>
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/20">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">Most Important To Review</p>
+              <ul className="mt-2 space-y-1.5 text-sm text-amber-950 dark:text-amber-100">
+                <li>1. Data collection, sharing, retention, and consent controls</li>
+                <li>2. Third-party advertising access</li>
+                <li>3. User deletion and opt-out rights</li>
+              </ul>
             </div>
           </div>
         </div>

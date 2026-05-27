@@ -12,17 +12,31 @@ const financialPatterns = {
 
 const count = (text, patterns) => patterns.reduce((sum, pattern) => sum + findMatches(text, [pattern]).length, 0);
 
-export const classifyFinancialDocument = (text, sections = []) => {
+export const classifyFinancialDocument = (text, sections = [], { relationship } = {}) => {
   const normalized = normalizeText(text);
   const signals = Object.entries(financialPatterns).map(([key, patterns]) => ({
     key,
     occurrences: count(normalized, patterns)
   }));
 
+
   const totalOccurrences = signals.reduce((sum, signal) => sum + signal.occurrences, 0);
   const sectionSupport = sections.filter((section) => /loan|borrower|repayment|emi|mortgage|collateral|credit bureau|collection/i.test(`${section.heading} ${section.text}`)).length;
-  const isFinancial = totalOccurrences >= 3 || (totalOccurrences >= 2 && sectionSupport >= 1);
-  const confidence = Math.max(0, Math.min(95, Math.round(42 + Math.min(34, totalOccurrences * 4.2) + Math.min(14, sectionSupport * 3))));
+
+  const roleKeys = new Set((relationship?.roles || []).map((r) => r.key));
+  const hasBorrowerContext = roleKeys.has('borrower') || roleKeys.has('lender');
+  const hasOperationalContext = roleKeys.has('contractor') || roleKeys.has('vendor') || roleKeys.has('university') || roleKeys.has('purchaser');
+
+  // Guardrail: penalty/charge vocabulary is common in operational contracts.
+  // If operational actors dominate and borrower/lender actors are absent, heavily suppress financial classification.
+  const guardrailSuppress = !hasBorrowerContext && hasOperationalContext;
+
+  const isFinancialBase = totalOccurrences >= 3 || (totalOccurrences >= 2 && sectionSupport >= 1);
+  const isFinancial = guardrailSuppress ? false : isFinancialBase;
+
+  const rawConfidence = Math.max(0, Math.min(95, Math.round(42 + Math.min(34, totalOccurrences * 4.2) + Math.min(14, sectionSupport * 3))));
+  const confidence = guardrailSuppress ? Math.round(rawConfidence * 0.35) : rawConfidence;
+
 
   const dominantSignals = signals
     .filter((signal) => signal.occurrences > 0)

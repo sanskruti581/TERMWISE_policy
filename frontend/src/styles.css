@@ -20,18 +20,32 @@ body {
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-soft dark:border-slate-800/80 dark:bg-slate-950;
   }
+
+
+  /* Premium surfaces: lighter borders, richer depth */
+  .surface {
+    @apply rounded-2xl border border-slate-200/70 bg-white/80 shadow-[0_10px_35px_-20px_rgba(2,6,23,0.35)] backdrop-blur;
+    @apply dark:bg-slate-950/60 dark:border-slate-800/70 dark:shadow-[0_12px_45px_-28px_rgba(0,0,0,0.55)];
+  }
+
+  /* Light divider line */
+  .divider {
+    @apply border-t border-slate-200/60 dark:border-slate-800/50;
+  }
+
 
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition duration-200 hover:from-emerald-500 hover:to-teal-500 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300/70 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700/60 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-800/70;
   }
 
   .input {
-    @apply w-full rounded-xl border border-slate-300 bg-white/90 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:focus:ring-emerald-900/40;
+    @apply w-full rounded-xl border border-slate-300/80 bg-white/90 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100/70 dark:border-slate-700/70 dark:bg-slate-900/80 dark:text-slate-100 dark:focus:ring-emerald-900/40;
   }
 }
+

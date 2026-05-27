@@ -17,6 +17,8 @@ import { buildAdaptiveRecommendations } from './adaptiveRecommendationEngine.js'
 import { isolateSemanticThemes } from './semanticIsolationEngine.js';
 import { detectSemanticContradictions } from './contradictionDetector.js';
 import { generateSemanticNarrative } from './semanticNarrativeGenerator.js';
+import { extractRelationshipSemantics } from './relationshipSemantics.js';
+
 
 const getAnalysisMode = (classification, subtype) => {
   const label = `${classification.documentType || ''} ${subtype.documentDomain || ''} ${subtype.documentSubtype || ''}`.toLowerCase();
@@ -51,7 +53,9 @@ const getAnalysisMode = (classification, subtype) => {
 export const runAnalysisPipeline = (text) => {
   const sectionAnalysis = analyzeDocumentSections(text);
   const initialClassification = classifyDocument(text);
-  const financialClassification = classifyFinancialDocument(text, sectionAnalysis.sections);
+  const relationship = extractRelationshipSemantics(text);
+  const financialClassification = classifyFinancialDocument(text, sectionAnalysis.sections, { relationship });
+
   const classification = financialClassification.isFinancial
     ? { ...initialClassification, documentType: 'Financial Document', documentTypeConfidence: Math.max(initialClassification.documentTypeConfidence || 0, financialClassification.financialConfidence) }
     : initialClassification;
@@ -74,8 +78,10 @@ export const runAnalysisPipeline = (text) => {
   const normalizedSignals = normalizeSignalConfidences(calibratedSignals);
   const context = balanceContextSignals(normalizedSignals, sectionAnalysis.sections, themeSummary.themeDominance, classification.documentType);
   const positiveIndicators = findPositiveIndicators(text);
-  const { detectedRisks, highlightedClauses, clauseIntents } = analyzeRisk(text, classification.documentType);
-  const semanticClauses = classifyClauseTypes(text);
+  const { detectedRisks, highlightedClauses, clauseIntents } = analyzeRisk(text, classification.documentType, { sections: sectionAnalysis.sections });
+
+  const semanticClauses = classifyClauseTypes(text, { fullText: text, sections: sectionAnalysis.sections });
+
   const clauseTypeSummary = summarizeClauseTypes(semanticClauses);
   const mergedHighlights = [...highlightedClauses, ...semanticClauses]
     .filter((clause, index, clauses) => clauses.findIndex((item) => String(item.sentence).toLowerCase() === String(clause.sentence).toLowerCase()) === index)
@@ -99,9 +105,12 @@ export const runAnalysisPipeline = (text) => {
     ...classification,
     ...subtype,
     ...confidenceProfile,
+    actorRoles: relationship?.dominantRoles || relationship?.roles,
+    relationship,
     financialClassification,
     analysisMode,
     detectedRisks,
+
     highlightedClauses: mergedHighlights,
     positiveIndicators,
     riskScore,

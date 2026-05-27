@@ -1,4 +1,8 @@
 import { splitTextIntoSentences } from './phraseMatcher.js';
+import { bindTextEvidence, certaintyToEvidenceStrength, EVIDENCE_STRENGTH } from './evidenceBinder.js';
+
+
+
 
 const clauseDefinitions = [
   {
@@ -79,26 +83,40 @@ const cleanClause = (sentence) => {
 
 const matchesAny = (sentence, patterns) => patterns.some((pattern) => pattern.test(sentence));
 
-export const classifyClauseTypes = (text) => {
+export const classifyClauseTypes = (text, { fullText = text, sections = [] } = {}) => {
   const sentences = splitTextIntoSentences(text);
   const clauses = [];
+
 
   for (const sentence of sentences) {
     const matchedDefinitions = clauseDefinitions.filter((definition) => matchesAny(sentence, definition.patterns));
     if (!matchedDefinitions.length) continue;
 
     const primary = matchedDefinitions[0];
+    const snippet = cleanClause(sentence);
+
     clauses.push({
       category: primary.category,
       clauseType: primary.clauseType,
       severity: primary.severity,
       sensitivity: primary.severity,
-      sentence: cleanClause(sentence),
+      sentence: snippet,
       explanation: primary.explanation,
       dimensions: impactDefaults[primary.clauseType] || impactDefaults['Operational clause'],
       badges: matchedDefinitions.map((definition) => definition.category),
-      intentTypes: matchedDefinitions.map((definition) => definition.clauseType)
+      intentTypes: matchedDefinitions.map((definition) => definition.clauseType),
+      evidence: [
+        bindTextEvidence({
+          fullText: fullText,
+          sections,
+          sentence,
+          snippet,
+          triggerType: primary.clauseType,
+          evidenceStrength: certaintyToEvidenceStrength(50)
+        })
+      ]
     });
+
   }
 
   const seen = new Set();

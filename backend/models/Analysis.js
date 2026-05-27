@@ -1,5 +1,22 @@
 import mongoose from 'mongoose';
 
+const evidenceSchema = new mongoose.Schema(
+  {
+    snippet: { type: String },
+    page: { type: Number },
+    paragraphIndex: { type: Number },
+    sentenceIndex: { type: Number },
+    sectionIndex: { type: Number },
+    startOffset: { type: Number },
+    endOffset: { type: Number },
+    triggerType: { type: String },
+    evidenceStrength: { type: String },
+    ocrConfidence: { type: Number },
+    evidenceSource: { type: String }
+  },
+  { _id: false }
+);
+
 const detectedRiskSchema = new mongoose.Schema(
   {
     category: { type: String, required: true },
@@ -7,25 +24,32 @@ const detectedRiskSchema = new mongoose.Schema(
     points: { type: Number, required: true },
     recommendation: { type: String },
     matches: [{ type: String }],
-    clauses: [{ type: String }]
+    clauses: [{ type: String }],
+    evidence: [evidenceSchema]
   },
   { _id: false }
 );
 
+
+
 const highlightedClauseSchema = new mongoose.Schema(
   {
     category: { type: String, required: true },
+
     severity: { type: String, enum: ['Safe', 'Informational', 'Low relevance', 'Moderate', 'Moderate operational impact', 'Consumer-sensitive', 'Risky', 'High Risk', 'High privacy concern'], default: 'Moderate' },
+
     sentence: { type: String, required: true },
     intentTypes: [{ type: String }],
     clauseType: { type: String },
     sensitivity: { type: String },
     explanation: { type: String },
     badges: [{ type: String }],
-    dimensions: { type: mongoose.Schema.Types.Mixed }
+    dimensions: { type: mongoose.Schema.Types.Mixed },
+    evidence: [evidenceSchema]
   },
   { _id: false }
 );
+
 
 const positiveIndicatorSchema = new mongoose.Schema(
   {

@@ -1,6 +1,9 @@
 import { findMatches, sentenceMatches, splitTextIntoSentences } from './phraseMatcher.js';
 import { findSemanticWindows, scoreSemanticWindow } from './semanticMatcher.js';
+
 import { classifyIntent } from './intentClassifier.js';
+import { bindTextEvidence, certaintyToEvidenceStrength, limitEvidenceArray } from './evidenceBinder.js';
+
 
 const typeRuleModifiers = {
   'Research/Funding Agreement': {
@@ -84,6 +87,72 @@ const evaluateSentenceMatch = (sentence, rule) => {
 };
 
 const riskRules = [
+  // --- Operational / enforcement / payment language (contract-context) ---
+  // These categories intentionally use points so they contribute to riskScore.
+  // They are evidence-first and can coexist with other semantic modes.
+  {
+    category: 'Penalty and default clauses',
+    points: 28,
+    recommendation: 'Review penalty, default, and enforcement mechanics (triggers, calculation method, notice/cure periods) and ensure they are commercially reasonable.',
+    positivePatterns: [
+      /penalt(?:y|ies)(?:\s+clauses?)?/i,
+      /default(?:\s+or\s+event\s+of\s+default)?/i,
+      /event of default/i,
+      /late fee/i,
+      /liquidated damages/i,
+      /forfeit(?:ure)?/i,
+      /remedy/i,
+      /enforc(?:e|ement)/i,
+      /terminate(?:\s+for)?\s+cause/i
+    ],
+    negativePatterns: []
+  },
+  {
+    category: 'Repayment obligations',
+    points: 22,
+    recommendation: 'Review repayment obligations (amount, schedule, interest/default interest, acceleration clauses) and confirm the triggering conditions and calculation basis.',
+    positivePatterns: [
+      /repay(?:ment)?/i,
+      /payment schedule/i,
+      /installment(?:s)?/i,
+      /amortiz(?:ation|e)/i,
+      /due and payable/i,
+      /outstanding(?:\s+(?:principal|amount))?/i,
+      /accelerat(?:ion)?/i
+    ],
+    negativePatterns: []
+  },
+  {
+    category: 'Termination and enforcement triggers',
+    points: 24,
+    recommendation: 'Review termination triggers and enforcement steps (notice, cure periods, survival obligations) to prevent unexpected escalations.',
+    positivePatterns: [
+      /terminate(?:\s+for)?\s+cause/i,
+      /termination(?:\s+for)?\s+/i,
+      /immediate\s+termination/i,
+      /right to terminate/i,
+      /breach\s+of/i,
+      /remedy(?:\s+for)?\s+/i,
+      /enforcement/i
+    ],
+    negativePatterns: []
+  },
+  {
+    category: 'Collection and recovery activity',
+    points: 20,
+    recommendation: 'Review collection/recovery clauses (collection authority, third-party collection, contact practices) and ensure procedures are proportionate.',
+    positivePatterns: [
+      /collection/i,
+      /recovery/i,
+      /recover(?:y|able)/i,
+      /debt collection/i,
+      /third-party collection/i,
+      /collection agency/i
+    ],
+    negativePatterns: []
+  },
+
+  // --- Existing privacy/data-risk rules ---
   {
     category: 'Data selling',
     points: 30,
@@ -187,11 +256,16 @@ const getSeverityLabel = (points) => {
   return 'Safe';
 };
 
-export const analyzeRisk = (text, documentType) => {
+export const analyzeRisk = (text, documentType, { sections = [] } = {}) => {
   const sentences = splitTextIntoSentences(text);
   const detectedRisks = [];
   const highlightedClauses = [];
   const clauseIntents = [];
+
+  // Evidence grounding (best-effort): bind to section/sentence indices.
+  // Keep legacy fields intact for backward compatibility.
+
+
 
   for (const rule of riskRules) {
     const candidates = sentences
@@ -206,6 +280,23 @@ export const analyzeRisk = (text, documentType) => {
     const points = Math.max(5, Math.round(rule.points * modifier * Math.max(0.75, averageCertainty / 100)));
     const clauses = candidates.slice(0, 4).map((item) => sentenceToHighlight(item.clause, rule.positivePatterns));
 
+    // Evidence for this risk category: bind the top clauses (best-effort).
+    const evidence = limitEvidenceArray(
+      candidates
+        .slice(0, 3)
+        .map((item) =>
+          bindTextEvidence({
+            fullText: text,
+            sections,
+            sentence: item.clause,
+            snippet: sentenceToHighlight(item.clause, rule.positivePatterns),
+            triggerType: rule.category,
+            evidenceStrength: certaintyToEvidenceStrength(item.certainty)
+          })
+        ),
+      3
+    );
+
     detectedRisks.push({
       category: rule.category,
       severity: getSeverityLabel(points),
@@ -214,17 +305,35 @@ export const analyzeRisk = (text, documentType) => {
       recommendation: rule.recommendation,
       matches: [...new Set(rawMatches)],
       clauses,
+      evidence,
       intentCategories: candidates.flatMap((item) => item.intentCategories || [])
     });
 
+
     const topClause = candidates.sort((a, b) => b.certainty - a.certainty)[0];
+    const topSnippet = sentenceToHighlight(topClause.clause, rule.positivePatterns);
+
+    // Evidence for the best matching highlighted clause (best-effort).
+    const highlightedEvidence = bindTextEvidence({
+      fullText: text,
+      sections,
+      sentence: topClause.clause,
+      snippet: topSnippet,
+      triggerType: rule.category,
+      evidenceStrength: certaintyToEvidenceStrength(topClause.certainty)
+    });
+
     highlightedClauses.push({
       category: rule.category,
       severity: getSeverityLabel(points),
-      sentence: sentenceToHighlight(topClause.clause, rule.positivePatterns),
+      sentence: topSnippet,
       intentTypes: topClause.intentCategories.map((entry) => entry.intent),
-      intentConfidence: topClause.intentCategories[0]?.confidence || 0
+      intentConfidence: topClause.intentCategories[0]?.confidence || 0,
+      // Ensure adaptive scoring can use clause impact
+      dimensions: { riskSeverity: points },
+      evidence: [highlightedEvidence]
     });
+
 
     clauseIntents.push(
       ...candidates.map((item) => ({
