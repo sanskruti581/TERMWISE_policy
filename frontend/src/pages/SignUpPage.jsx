@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, FileSearch, Lock, Mail, Scale, ShieldCheck, User } from 'lucide-react';
+import { ArrowLeft, Lock, Mail, Scale, User } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme.js';
+
 
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const PASSWORD_HELP = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
 
 const SignUpPage = () => {
+  useTheme();
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -60,41 +64,41 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,#064e3b_0%,#020617_34%,#020617_100%)] px-4 py-8 text-white">
-      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-[#020617] px-4 py-7 text-white">
+      <div className="pointer-events-none absolute bottom-[-10rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(52,211,153,0.14),transparent_40%)]" />
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="w-full max-w-md justify-self-center rounded-3xl border border-white/10 bg-white/[0.07] p-6 shadow-2xl shadow-black/40 backdrop-blur-xl md:p-8">
-          <Link
-            to="/"
-            className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition hover:text-emerald-200"
-          >
-            <ArrowLeft size={16} />
-            Back to home
-          </Link>
+      <div className="relative mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-[29rem] flex-col justify-center">
+        <Link
+          to="/"
+          className="mb-6 inline-flex w-fit items-center gap-2 text-sm font-medium text-slate-500 transition duration-200 hover:text-emerald-200"
+        >
+          <ArrowLeft size={15} />
+          Back
+        </Link>
 
-          <div className="mb-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5 text-sm font-semibold text-emerald-100">
-              <Scale size={15} />
-              TermsWise
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-white">Create your workspace</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              Start reviewing documents with clarity.
-            </p>
+        <div className="mb-6 text-center">
+          <div className="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-2xl bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/15">
+            <Scale size={19} />
           </div>
+          <p className="mb-2 text-sm font-semibold text-emerald-200">TermsWise</p>
+          <h1 className="text-[1.7rem] font-semibold tracking-tight text-white">Create your account</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Start reviewing documents with clarity.
+          </p>
+        </div>
 
+        <div className="animate-[fadeIn_240ms_ease-out] rounded-[1.5rem] bg-[#0b1220]/95 p-6 shadow-[0_20px_70px_-35px_rgba(0,0,0,0.9)] ring-1 ring-white/10 backdrop-blur-[6px] border border-white/10">
           {error && (
-            <div className="mb-5 rounded-2xl border border-red-400/20 bg-red-500/10 p-3 text-sm text-red-100">
+            <div className="mb-5 rounded-2xl bg-red-500/10 p-3 text-sm text-red-100 ring-1 ring-red-400/20">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <User size={16} /> Full Name
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+                <User size={15} /> Full Name
               </label>
               <input
                 type="text"
@@ -103,13 +107,13 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 placeholder="John Doe"
                 required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 hover:border-white/20 focus:border-emerald-300/70 focus:bg-white/[0.13] focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 py-2.5 text-white outline-none transition duration-200 placeholder:text-slate-500 hover:bg-white/[0.09] focus:border-emerald-300/50 focus:bg-white/[0.105] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
               />
             </div>
 
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <Mail size={16} /> Email
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+                <Mail size={15} /> Email
               </label>
               <input
                 type="email"
@@ -118,13 +122,13 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 placeholder="your@email.com"
                 required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 hover:border-white/20 focus:border-emerald-300/70 focus:bg-white/[0.13] focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 py-2.5 text-white outline-none transition duration-200 placeholder:text-slate-500 hover:bg-white/[0.09] focus:border-emerald-300/50 focus:bg-white/[0.105] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
               />
             </div>
 
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <Lock size={16} /> Password
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+                <Lock size={15} /> Password
               </label>
               <input
                 type="password"
@@ -136,16 +140,16 @@ const SignUpPage = () => {
                 title={PASSWORD_HELP}
                 placeholder="Create a strong password"
                 required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 hover:border-white/20 focus:border-emerald-300/70 focus:bg-white/[0.13] focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 py-2.5 text-white outline-none transition duration-200 placeholder:text-slate-500 hover:bg-white/[0.09] focus:border-emerald-300/50 focus:bg-white/[0.105] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
               />
               <p className="mt-2 text-xs leading-5 text-slate-400">
-                Use 8+ characters with a number and symbol.
+                8+ characters with a number and symbol.
               </p>
             </div>
 
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <Lock size={16} /> Confirm Password
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+                <Lock size={15} /> Confirm Password
               </label>
               <input
                 type="password"
@@ -154,57 +158,28 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 hover:border-white/20 focus:border-emerald-300/70 focus:bg-white/[0.13] focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 py-2.5 text-white outline-none transition duration-200 placeholder:text-slate-500 hover:bg-white/[0.09] focus:border-emerald-300/50 focus:bg-white/[0.105] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 py-3 font-bold text-slate-950 shadow-xl shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-emerald-500/25 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 w-full rounded-xl bg-emerald-400 py-2.5 font-semibold text-slate-950 shadow-lg shadow-emerald-500/10 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-300 hover:shadow-emerald-500/20 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Creating account...' : 'Sign Up'}
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-slate-300">
+          <p className="mt-5 text-center text-sm text-slate-400">
             Already have an account?{' '}
             <Link to="/signin" className="font-semibold text-emerald-200 hover:underline">
               Sign In
             </Link>
           </p>
         </div>
-
-        <div className="hidden lg:block">
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-semibold text-slate-200">
-              <FileSearch size={16} />
-              TermsWise workspace
-            </div>
-            <h2 className="max-w-xl text-4xl font-black leading-tight tracking-tight text-white">
-              Review policies with less noise.
-            </h2>
-
-            <div className="mt-8 grid gap-3">
-              {[
-                ['Fast briefs', 'Key points first.'],
-                ['Source evidence', 'Clauses stay linked.'],
-                ['Review history', 'Pick up later.'],
-              ].map(([title, detail]) => (
-                <div key={title} className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 rounded-xl bg-emerald-400/10 p-2 text-emerald-200">
-                      <ShieldCheck size={18} />
-                    </span>
-                    <div>
-                      <p className="font-semibold text-white">{title}</p>
-                      <p className="mt-1 text-sm text-slate-400">{detail}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="mt-5 text-center text-xs text-slate-500">
+          Understand documents before agreeing.
         </div>
       </div>
     </div>
