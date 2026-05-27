@@ -27,7 +27,7 @@ const SignUpPage = () => {
       setError('Passwords do not match');
       return;
     }
-
+    
     if (!PASSWORD_RULE.test(formData.password)) {
       setError(PASSWORD_HELP);
       return;
@@ -36,7 +36,8 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/signup', {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiBase}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
